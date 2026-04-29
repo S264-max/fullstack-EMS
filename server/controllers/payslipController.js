@@ -1,7 +1,8 @@
 
 
 import Employee from "../models/Employee.js";
-import payslip from "../models/Payslip.js";
+import Payslip from "../models/Payslip.js";
+
 
 
 //create payslip
