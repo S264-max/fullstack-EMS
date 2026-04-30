@@ -10,7 +10,7 @@ export const inngest = new Inngest({ id: "fullstack-ems" });
 
 // Auto checkout for employees:
 const autoCheckOut = inngest.createFunction(
-  { id: "auto-check-out" ,triggers:[{event:"employee/check-out"}]},
+  { id: "auto-check-out" ,event:"employee/check-out"},
   async ({ event, step }) => {
     const {employeeId, attendanceId}=event.data;
 
@@ -55,7 +55,7 @@ const autoCheckOut = inngest.createFunction(
 
 // send email to admin , if admin doesn't take action on leave application within 24 hours
 const leaveApplicationReminder = inngest.createFunction(
-  { id: "leave-application-reminder",triggers:[{event:"leave/pending"}] },
+  { id: "leave-application-reminder",event:"leave/pending" },
   
   async ({event, step}) => {
         const {leaveApplicationId}=event.data;
@@ -89,7 +89,7 @@ const leaveApplicationReminder = inngest.createFunction(
 //Cron: check attendance at 11:30 AM IST(06:00 UTC) and email absent employees
 
 const attendanceReminderCron = inngest.createFunction(
-  { id: "attendance-reminder-cron",triggers:[ {cron:"TZ=Asia/Kolkata 30 11  * * *"}] },
+  { id: "attendance-reminder-cron",cron:"TZ=Asia/Kolkata 30 11  * * *" },
  //06:00 UTC = 11:30 AM IST
 
         async ({step}) => {
@@ -143,7 +143,7 @@ const attendanceReminderCron = inngest.createFunction(
                 await step.run("send-reminder-emails",async () => {
                     const emailPromises =absentEmployees.map((emp)=>{
                         //send email
-                        sendEmail({
+                        return sendEmail({
                             to:emp.email,
                             subject: `Attendance Reminder- Please mark your Attendance`,
                             body:`<div style="max-width: 600px; font-family: Arial, sans-serif;">
@@ -157,8 +157,9 @@ const attendanceReminderCron = inngest.createFunction(
                                 <p style="font-size: 16px;">Best Regards,</p>
                                 <p style="font-size: 16px;"><strong>QuickEMS</strong></p>
                             </div>`
-                        })
-                    })
+                        });
+                    });
+                    await Promise.all(emailPromises);
                 })
               }
               return {totalActive:activeEmployees.length,onLeave:onLeaveIds.length, 
