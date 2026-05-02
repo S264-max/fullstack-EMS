@@ -104,7 +104,7 @@ const attendanceReminderCron = inngest.createFunction(
   {
     id: "attendance-reminder-cron",
     triggers: [
-      { cron: "TZ=Asia/Kolkata 30 11 * * *" }, // ✅ FIXED
+      { cron: "TZ=Asia/Kolkata 30 11 * * *" }, 
     ],
   },
         async ({step}) => {
@@ -174,9 +174,10 @@ const attendanceReminderCron = inngest.createFunction(
                             </div>`
                         });
                     });
-                    await Promise.all(emailPromises);
+                    // await Promise.all(emailPromises);
                 })
               }
+              await Promise.all(emailPromises);
               return {totalActive:activeEmployees.length,onLeave:onLeaveIds.length, 
                 checkedIn:checkedInIds.length, absent:absentEmployees.length}
         }
