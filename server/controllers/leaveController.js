@@ -5,49 +5,88 @@ import Employee from "../models/Employee.js";
 import LeaveApplication from "../models/LeaveApplication.js";
 //create leave
 //POST /api/leaves
-export const createLeave=async (req,res) => {
+// export const createLeave=async (req,res) => {
+//     try {
+//         const session=req.session;
+//         const employee=await Employee.findOne({userId:session.userId})
+//         if(!employee)return res.status(404).json({error:"Employee not found"});
+//         if(employee.isDeleted){
+//             return res.status(403).json({error:"Your account is Deactivated.You cannot apply for leave"});
+//         }
+
+//         const {type, startDate, endDate, reason}= req.body;
+//         if(!type || !startDate || !endDate ||!reason){
+//              return res.status(400).json({error:"Missing fields"});
+//         }
+//         const today=new Date();
+//         today.setHours(0,0,0,0);
+//         if(new Date(startDate)<=today || new Date(endDate)<=today){
+//             return res.status(400).json({error:"Leave dates must be in future"});
+//         }
+
+//          if(new Date(endDate)< new Date(startDate)){
+//             return res.status(400).json({error:"End date cannot be before start date"});
+//         }
+
+//         const leave= await LeaveApplication.create({
+//             employeeId:employee._id,
+//             type,
+//             startDate:new Date(startDate),
+//             endDate:new Date(endDate),
+//             reason,
+//             status:"PENDING",
+
+//         })
+
+//         await inngest.send({
+//             name:"leave/pending",
+//             data:{LeaveApplicationId:leave._id,}
+//         })
+//         return res.json({success:true,data:leave});
+
+//     } catch (error) {
+//         return res.status(500).json({error:"Failed"});
+//     }
+// }
+
+export const createLeave = async (req, res) => {
     try {
-        const session=req.session;
-        const employee=await Employee.findOne({userId:session.userId})
-        if(!employee)return res.status(404).json({error:"Employee not found"});
-        if(employee.isDeleted){
-            return res.status(403).json({error:"Your account is Deactivated.You cannot apply for leave"});
+        console.log("API HIT");
+
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ error: "Unauthorized" });
         }
 
-        const {type, startDate, endDate, reason}= req.body;
-        if(!type || !startDate || !endDate ||!reason){
-             return res.status(400).json({error:"Missing fields"});
-        }
-        const today=new Date();
-        today.setHours(0,0,0,0);
-        if(new Date(startDate)<=today || new Date(endDate)<=today){
-            return res.status(400).json({error:"Leave dates must be in future"});
+        const employee = await Employee.findOne({ userId: req.session.userId });
+
+        if (!employee) {
+            return res.status(404).json({ error: "Employee not found" });
         }
 
-         if(new Date(endDate)< new Date(startDate)){
-            return res.status(400).json({error:"End date cannot be before start date"});
+        const { type, startDate, endDate, reason } = req.body;
+
+        if (!type || !startDate || !endDate || !reason) {
+            return res.status(400).json({ error: "Missing fields" });
         }
 
-        const leave= await LeaveApplication.create({
-            employeeId:employee._id,
+        const leave = await LeaveApplication.create({
+            employeeId: employee._id,
             type,
-            startDate:new Date(startDate),
-            endDate:new Date(endDate),
+            startDate,
+            endDate,
             reason,
-            status:"PENDING",
+            status: "PENDING"
+        });
 
-        })
+        console.log("Leave created:", leave);
 
-        await inngest.send({
-            name:"leave/pending",
-            data:{LeaveApplicationId:leave._id,}
-        })
-        return res.json({success:true,data:leave});
+        return res.json({ success: true, data: leave });
 
     } catch (error) {
-        return res.status(500).json({error:"Failed"});
+        console.error("Create Leave Error:", error);
+        return res.status(500).json({ error: error.message });
     }
-}
+};
 
 
 //GET leave

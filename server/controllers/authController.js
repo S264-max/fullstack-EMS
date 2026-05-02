@@ -18,12 +18,19 @@ export const login=async (req,res) => {
         if(!user){
             return res.status(401).json({error:"Invalid credentials"});
         }
-        if(role_type ==="admin" && user.role !=="ADMIN"){
-            return res.status(401).json({error:"Not authorizes as admin"});
+        // if(role_type ==="admin" && user.role !=="ADMIN"){
+        //     return res.status(401).json({error:"Not authorizes as admin"});
+        // }
+        //  if(role_type ==="employee" && user.role !=="Employee"){
+        //      return res.status(401).json({error:"Not authorizes as employee"});
+        //  }
+                if (role_type === "admin" && user.role.toLowerCase() !== "admin") {
+            return res.status(401).json({ error: "Not authorized as admin" });
         }
-         if(role_type ==="employee" && user.role !=="Employee"){
-             return res.status(401).json({error:"Not authorizes as employee"});
-         }
+
+        if (role_type === "employee" && user.role.toLowerCase() !== "employee") {
+            return res.status(401).json({ error: "Not authorized as employee" });
+        }
          const isValid =await bcrypt.compare(password,user.password)
          if(!isValid){
             return res.status(401).json({error:"Invalid credentials"});
