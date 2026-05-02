@@ -10,7 +10,7 @@ export const getEmployees =async (req,res) => {
         const where={};
         if(department)where.department=department;
 
-        const employees=(await Employee.find(where)).toSorted({createdAt:-1}).populate("userId","email role").lean();
+        const employees=await Employee.find(where).sort({createdAt:-1}).populate("userId","email role").lean();
         const result=employees.map((emp)=>({
             ...emp,
             id:emp._id.toString(),
@@ -106,7 +106,7 @@ export const updateEmployee =async (req,res) => {
             return res.status(400).json({error:"Email already exists"})
         }
         
-        return res.json(500).json({error:"failed to update employee"});
+        return res.status(500).json({error:"failed to update employee"});
     }
 }
 

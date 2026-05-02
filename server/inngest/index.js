@@ -6,11 +6,17 @@ import LeaveApplication from "../models/LeaveApplication.js";
 import sendEmail from "../config/nodemailer.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "fullstack-ems" });
+export const inngest = new Inngest({
+  id: "fullstack-ems",
+  eventKey: process.env.INNGEST_EVENT_KEY, 
+});
 
 // Auto checkout for employees:
 const autoCheckOut = inngest.createFunction(
-  { id: "auto-check-out" ,event:"employee/check-out"},
+  {
+    id: "auto-check-out",
+    triggers: [{ event: "employee/check-out" }],
+  },
   async ({ event, step }) => {
     const {employeeId, attendanceId}=event.data;
 
@@ -53,9 +59,14 @@ const autoCheckOut = inngest.createFunction(
   },
 );
 
+
+
 // send email to admin , if admin doesn't take action on leave application within 24 hours
 const leaveApplicationReminder = inngest.createFunction(
-  { id: "leave-application-reminder",event:"leave/pending" },
+  {
+    id: "leave-application-reminder",
+    triggers: [{ event: "leave/pending" }], // ✅ FIXED
+  },
   
   async ({event, step}) => {
         const {leaveApplicationId}=event.data;
@@ -86,12 +97,16 @@ const leaveApplicationReminder = inngest.createFunction(
   
 );
 
+
 //Cron: check attendance at 11:30 AM IST(06:00 UTC) and email absent employees
 
 const attendanceReminderCron = inngest.createFunction(
-  { id: "attendance-reminder-cron",cron:"TZ=Asia/Kolkata 30 11  * * *" },
- //06:00 UTC = 11:30 AM IST
-
+  {
+    id: "attendance-reminder-cron",
+    triggers: [
+      { cron: "TZ=Asia/Kolkata 30 11 * * *" }, // ✅ FIXED
+    ],
+  },
         async ({step}) => {
               //step ! : Get today's date range (IST)
               const today=await step.run("get-today-date",()=>{

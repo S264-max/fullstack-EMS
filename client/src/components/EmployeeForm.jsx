@@ -2,14 +2,33 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { DEPARTMENTS } from "../assets/assets"
 import {Loader2Icon } from "lucide-react"
+import api from "../api/axios"
+import toast from "react-hot-toast"
 
 
-const EmployeeForm = ({initialData, onSucess, onCancel}) => {
+const EmployeeForm = ({initialData, onSuccess, onCancel}) => {
     const navigate =useNavigate()
     const [loading,setLoading]= useState(false)
     const isEditMode =!!initialData;
-    const handleSubmit=async () => {
+    const handleSubmit=async (e) => {
         e.preventDefault()
+        setLoading(true)
+        const formData=new FormData(e.currentTarget);
+        if(isEditMode){
+            const pwd=formData.get("password")
+            if(!pwd)formData.delete("password")
+        }
+    try {
+        const url= isEditMode ?`/employees/${initialData.id}`:"/employees";
+        const method=isEditMode ? "put":"post";
+        await api[method](url,formData)
+        onSuccess ?onSuccess() :navigate("/employees")
+    } catch (error) {
+        toast.error(error.response?.data?.error || error.message)
+    }
+    finally{
+        setLoading(false);
+    }
     }
   return (
    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl animate-fade-in">
@@ -126,7 +145,7 @@ const EmployeeForm = ({initialData, onSucess, onCancel}) => {
             )}>
                 Cansel
             </button>
-             <button type="button" className="btn-primary flex items-center justify-center" disabled={loading}>
+             <button type="submit" className="btn-primary flex items-center justify-center" disabled={loading}>
                 {loading && <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />}
                 {isEditMode ? "Update Employee" :"Create Employee"}
             </button>

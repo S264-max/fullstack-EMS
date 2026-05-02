@@ -5,7 +5,7 @@ import { DEPARTMENTS } from "../constants/department.js";
 import Attendance from "../models/Attendance.js";
 import Employee from "../models/Employee.js";
 import LeaveApplication from "../models/LeaveApplication.js";
-import payslip from "../models/Payslip.js";
+import Payslip from "../models/Payslip.js";
 
 
 //get dashboard for employee and admin
@@ -19,8 +19,8 @@ export const getDashboard=async (req,res) => {
                 Employee.countDocuments({isDeleted:{$ne:true}}),
                 Attendance.countDocuments({
                     date:{
-                        $gte:new Date(new date().setHours(0,0,0,0)),
-                        $lt:new Date(new date().setHours(24,0,0,0)),
+                        $gte:new Date(new Date().setHours(0,0,0,0)),
+                        $lt:new Date(new Date().setHours(24,0,0,0)),
                     }
                 }),
                 LeaveApplication.countDocuments({status:"PENDING"})
